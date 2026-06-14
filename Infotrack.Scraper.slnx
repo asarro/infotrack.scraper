@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Infotrack.Scraper/Infotrack.Scraper.csproj" />
+  <Project Path="Test.Infotrack.Scraper/Test.Infotrack.Scraper.csproj" />
+</Solution>

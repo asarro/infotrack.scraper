@@ -55,3 +55,16 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# Frontend (infotrack-ui)
+node_modules/
+dist/
+.vite/
+npm-debug.log*
+yarn-error.log*
+
+# IDE / tooling
+*.user
+
+# macOS
+.DS_Store
