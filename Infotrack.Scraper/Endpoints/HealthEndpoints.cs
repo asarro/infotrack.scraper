@@ -1,6 +1,8 @@
 using Npgsql;
 using Serilog;
 
+namespace Infotrack.Scraper.Endpoints;
+
 internal static class HealthEndpoints
 {
     internal static WebApplication MapHealthEndpoints(this WebApplication app)

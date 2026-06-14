@@ -1,3 +1,5 @@
+using Infotrack.Scraper.Endpoints;
+using Infotrack.Scraper.Extensions;
 using Scalar.AspNetCore;
 using Serilog;
 
@@ -17,6 +19,7 @@ try
     builder.Services.AddOpenApi();
     builder.Services.AddDatabase(builder.Configuration);
     builder.Services.AddCorsPolicy(builder.Configuration);
+    builder.Services.AddConveyancingServices(builder.Configuration);
 
     var app = builder.Build();
 
@@ -30,6 +33,7 @@ try
 
     app.UseCors();
     app.MapHealthEndpoints();
+    app.MapConveyancingEndpoints();
 
     app.Run();
 }
