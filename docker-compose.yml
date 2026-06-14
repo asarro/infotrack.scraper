@@ -1,0 +1,9 @@
+name: infotrack
+
+# Brings up every concern with a single `docker compose up`. Each file is also
+# runnable on its own (e.g. `docker compose -f docker-compose.infrastructure.yml up`).
+include:
+  - docker-compose.infrastructure.yml
+  - docker-compose.logging.yml
+  - docker-compose.app.yml
+  - docker-compose.fe.yml

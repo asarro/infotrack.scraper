@@ -1,0 +1,24 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      seq:
+        condition: service_started
+    ports:
+      - "5070:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=infotrack;Username=postgres;Password=postgres"
+      # WriteTo[1] is the Seq sink (WriteTo[0] is Console). Inside the network Seq
+      # accepts ingestion on port 80, so target the service name directly.
+      Serilog__WriteTo__1__Args__serverUrl: "http://seq"
+    networks:
+      - infotrack-network
+
+networks:
+  infotrack-network:
+    name: infotrack-network
