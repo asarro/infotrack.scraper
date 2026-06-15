@@ -21,7 +21,7 @@ try
     builder.Services.AddOpenApi();
     builder.Services.AddDatabase(builder.Configuration);
     builder.Services.AddCorsPolicy(builder.Configuration);
-    builder.Services.AddConveyancingServices(builder.Configuration);
+    builder.Services.AddServices(builder.Configuration);
 
     var app = builder.Build();
 
