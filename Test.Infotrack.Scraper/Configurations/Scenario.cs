@@ -1,4 +1,4 @@
-using Infotrack.Scraper.Conveyancing;
+using Infotrack.Scraper.Scraping;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,7 +26,7 @@ public sealed class Scenario
         {
             _factory = _fixture.WithWebHostBuilder(b =>
                 b.ConfigureTestServices(services =>
-                    services.AddHttpClient<ISolicitorSearchService, SolicitorSearchService>()
+                    services.AddHttpClient<ITargetSiteClient, SolicitorsComClient>()
                             .ConfigurePrimaryHttpMessageHandler(() => _mockHttp)));
             return this;
         }
@@ -46,6 +46,34 @@ public sealed class Scenario
         get
         {
             _mockHttp.When("*").Respond(System.Net.HttpStatusCode.InternalServerError);
+            return this;
+        }
+    }
+
+    public Scenario TheSearchSiteRespondsWithListingHtml
+    {
+        get
+        {
+            const string html = """
+                <html><body>
+                  <div class="result-item">
+                    <span class="h2">Test Solicitors Ltd<div class="greentick" title="quality marks"></div></span>
+                    <div class="phone-block mobile-hidden">
+                      <span>Phone:</span>
+                      <a rel="noindex" href="tel:02000000000">020 0000 0000</a>
+                    </div>
+                    <a href="/test-solicitors.html" class="link-map">
+                      <address>1 Test Street, London</address>
+                    </a>
+                    <p>Expert conveyancing solicitors serving London.</p>
+                    <ul class="list-item">
+                      <li><a target="_blank" href="https://www.test-solicitors.co.uk" rel="nofollow"><i class="fa fa-globe"></i>Website</a></li>
+                    </ul>
+                  </div>
+                </body></html>
+                """;
+            _mockHttp.When("*").Respond(System.Net.HttpStatusCode.OK,
+                new System.Net.Http.StringContent(html, System.Text.Encoding.UTF8, "text/html"));
             return this;
         }
     }

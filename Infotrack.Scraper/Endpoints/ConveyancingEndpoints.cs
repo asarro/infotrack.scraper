@@ -14,7 +14,7 @@ internal static class ConveyancingEndpoints
             ISolicitorSearchService service,
             CancellationToken ct) =>
         {
-            var result = await service.SearchAsync(location, ct);
+            var result = await service.SearchAsync(location.ToLowerInvariant(), ct);
 
             return result switch
             {

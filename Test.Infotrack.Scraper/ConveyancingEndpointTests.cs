@@ -29,4 +29,12 @@ public class ConveyancingEndpointTests(ApiWebApplicationFixture fixture)
             .And.TheSearchSiteReturnsAnError
             .And.SearchForSolicitors("London")
             .Then.ShouldGetABadRequestResponse();
+
+    [Fact]
+    public Task SearchSolicitors_WhenSiteRespondsWithHtml_ReturnsSolicitors() =>
+        When
+            .TheApplicationIsRunning
+            .And.TheSearchSiteRespondsWithListingHtml
+            .And.SearchForSolicitors("London")
+            .Then.ShouldReturnSolicitors();
 }

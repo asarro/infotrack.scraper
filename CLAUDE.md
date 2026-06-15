@@ -2,12 +2,12 @@
 
 ## Project overview
 
-A .NET 10 Web API + React/TypeScript SPA that will extract solicitor contact details by
-location from public conveyancing listings and turn them into a standard report. This
-repository is currently a **scaffold** — the stack is wired end-to-end but no scraping or
-domain logic exists yet. See [CONTEXT.md](CONTEXT.md) for the domain glossary and
+A .NET 10 Web API + React/TypeScript SPA that extracts solicitor contact details by
+location from public conveyancing listings and turns them into a standard report. The
+config-driven HTML parsing engine is implemented and wired into the `/conveyancing/solicitors`
+endpoint. See [CONTEXT.md](CONTEXT.md) for the domain glossary and
 [docs/adr/0001-scaffold-architecture.md](docs/adr/0001-scaffold-architecture.md) for the
-shape and reasoning.
+architecture.
 
 ## Stack
 
@@ -24,6 +24,7 @@ shape and reasoning.
 ```
 Infotrack.Scraper.slnx
 Infotrack.Scraper/            # API: Program.cs, appsettings*, Infotrack.Scraper.csproj
+Infotrack.Scraper/Resources/  # per-site parsing rules JSON files (e.g. solicitors.com.rules.json)
 Test.Infotrack.Scraper/      # xunit tests
 infotrack-ui/                # Vite + React + TS SPA (+ Dockerfile, nginx.conf)
 Dockerfile                   # multi-stage build for the API
@@ -56,5 +57,8 @@ Endpoints (Docker): API `http://localhost:5070` (`/health`, `/scalar`,
 - Nullable reference types are enabled — don't suppress nullability warnings.
 - Log through Serilog; the Seq sink URL comes from configuration
   (`Serilog:WriteTo:1:Args:serverUrl`) and is overridden in `docker-compose.app.yml`.
-- No third-party libraries for the eventual scraping logic — structure it by hand
-  (per the task brief). Keep the domain language aligned with `CONTEXT.md`.
+- No third-party libraries for scraping logic — structured by hand per the task brief.
+  Keep the domain language aligned with `CONTEXT.md`.
+- Per-site CSS selector rules live in `Infotrack.Scraper/Resources/<site>.rules.json`,
+  not inline in `appsettings.json`. The file name is declared via `ParsingRulesFile` in
+  the `TargetSites` array. See [docs/features/parsing-rules-resource-file/decisions.md](docs/features/parsing-rules-resource-file/decisions.md) (DEC-0004).

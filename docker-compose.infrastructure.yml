@@ -9,6 +9,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      - ./db/001_create_solicitors.sql:/docker-entrypoint-initdb.d/001_create_solicitors.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d infotrack"]
       interval: 5s

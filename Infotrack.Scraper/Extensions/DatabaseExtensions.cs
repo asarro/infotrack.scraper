@@ -1,3 +1,4 @@
+using Infotrack.Scraper.Persistence;
 using Npgsql;
 
 namespace Infotrack.Scraper.Extensions;
@@ -12,7 +13,9 @@ internal static class DatabaseExtensions
                                    "Connection string 'DefaultConnection' is not configured.");
 
         services.AddSingleton(NpgsqlDataSource.Create(connectionString));
+        services.AddScoped<ISolicitorRepository, SolicitorRepository>();
 
         return services;
     }
+
 }

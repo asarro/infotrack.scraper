@@ -1,0 +1,33 @@
+{
+  "ContainerSelector": ".result-item",
+  "Fields": [
+    {
+      "Field": "Name",
+      "Selector": ".h2",
+      "StopAt": ".greentick"
+    },
+    {
+      "Field": "Phone",
+      "Selector": ".phone-block",
+      "ChildSelector": "a"
+    },
+    {
+      "Field": "Address",
+      "Selector": ".link-map",
+      "ChildSelector": "address"
+    },
+    {
+      "Field": "Description",
+      "Selector": "p"
+    },
+    {
+      "Field": "Website",
+      "Selector": "a",
+      "Attribute": "href",
+      "AttributeFilter": {
+        "Name": "target",
+        "Value": "_blank"
+      }
+    }
+  ]
+}
