@@ -29,7 +29,8 @@ internal sealed class SolicitorRepository(NpgsqlDataSource dataSource) : ISolici
                    address       AS Address,
                    phone         AS Phone,
                    description   AS Description,
-                   website       AS Website
+                   website       AS Website,
+                   created_date  AS CreatedDate
             FROM solicitors
             WHERE location_id = @LocationId
             """,

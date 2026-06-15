@@ -7,4 +7,5 @@ internal sealed record SolicitorRecord(
     string? Address,
     string? Phone,
     string? Description,
-    string? Website);
+    string? Website,
+    DateTime CreatedDate);
