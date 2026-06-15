@@ -1,5 +1,7 @@
 using Serilog;
 
+namespace Infotrack.Scraper.Extensions;
+
 internal static class LoggingExtensions
 {
     internal static IServiceCollection AddLoggingServices(

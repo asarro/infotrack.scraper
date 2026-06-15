@@ -1,3 +1,5 @@
+namespace Infotrack.Scraper.Extensions;
+
 internal static class CorsExtensions
 {
     internal static IServiceCollection AddCorsPolicy(

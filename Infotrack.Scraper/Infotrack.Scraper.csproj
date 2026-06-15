@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="CSharpFunctionalExtensions" Version="3.7.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.7.0" />
     <PackageReference Include="Npgsql" Version="10.0.3" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.16.3" />
     <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />

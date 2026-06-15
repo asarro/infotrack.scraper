@@ -65,6 +65,7 @@ yarn-error.log*
 
 # IDE / tooling
 *.user
+.idea/
 
 # macOS
 .DS_Store

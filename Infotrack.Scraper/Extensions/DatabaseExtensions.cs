@@ -1,13 +1,15 @@
 using Npgsql;
 
+namespace Infotrack.Scraper.Extensions;
+
 internal static class DatabaseExtensions
 {
     internal static IServiceCollection AddDatabase(
         this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? throw new InvalidOperationException(
-                "Connection string 'DefaultConnection' is not configured.");
+                               ?? throw new InvalidOperationException(
+                                   "Connection string 'DefaultConnection' is not configured.");
 
         services.AddSingleton(NpgsqlDataSource.Create(connectionString));
 

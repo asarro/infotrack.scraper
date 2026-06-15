@@ -56,6 +56,63 @@
   }
 }
 
+.tag-input {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 2px solid var(--accent-border);
+  background: var(--accent-bg);
+  width: 100%;
+  max-width: 400px;
+  overflow-x: auto;
+  cursor: text;
+
+  &:focus-within {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  background: var(--accent-bg);
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
+  font-size: 14px;
+}
+
+.tag-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--accent);
+  font-size: 16px;
+  line-height: 1;
+  padding: 0;
+
+  &:hover {
+    opacity: 0.7;
+  }
+}
+
+.tag-autocomplete {
+  flex: 1;
+  min-width: 80px;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: inherit;
+  font-size: 16px;
+  padding: 0;
+}
+
 #center {
   display: flex;
   flex-direction: column;
