@@ -1,38 +1,32 @@
-using System.Net;
-using System.Net.Http.Json;
-using AwesomeAssertions;
+using Test.Infotrack.Scraper.Configurations;
 
 namespace Test.Infotrack.Scraper;
 
 [Collection(nameof(ApiCollection))]
-public class ConveyancingEndpointTests
+public class ConveyancingEndpointTests(ApiWebApplicationFixture fixture)
 {
-    private readonly ApiWebApplicationFixture _fixture;
-
-    public ConveyancingEndpointTests(ApiWebApplicationFixture fixture)
-    {
-        _fixture = fixture;
-    }
+    private Scenario When => new(fixture);
 
     [Fact]
-    public async Task Locations_Returns_Ok_With_Non_Empty_List()
-    {
-        var client = _fixture.CreateClient();
-
-        var response = await client.GetAsync("/conveyancing/locations");
-
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var locations = await response.Content.ReadFromJsonAsync<List<string>>();
-        locations.Should().NotBeNullOrEmpty();
-    }
+    public Task Locations_ReturnsOk() =>
+        When
+            .TheApplicationIsRunning
+            .And.IRequestLocations
+            .Then.ShouldGetASuccessfulResponse();
 
     [Fact]
-    public async Task Solicitors_Returns_Ok_For_Location()
-    {
-        var client = _fixture.CreateClient();
+    public Task SearchSolicitors_WhenSiteRespondsSuccessfully_ReturnsOk() =>
+        When
+            .TheApplicationIsRunning
+            .And.TheSearchSiteRespondsSuccessfully
+            .And.SearchForSolicitors("London")
+            .Then.ShouldGetASuccessfulResponse();
 
-        var response = await client.GetAsync("/conveyancing/solicitors?location=London");
-
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-    }
+    [Fact]
+    public Task SearchSolicitors_WhenSiteReturnsError_ReturnsBadRequest() =>
+        When
+            .TheApplicationIsRunning
+            .And.TheSearchSiteReturnsAnError
+            .And.SearchForSolicitors("London")
+            .Then.ShouldGetABadRequestResponse();
 }

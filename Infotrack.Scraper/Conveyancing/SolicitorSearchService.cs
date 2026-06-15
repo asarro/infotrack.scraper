@@ -1,26 +1,28 @@
+using System.Collections.ObjectModel;
 using CSharpFunctionalExtensions;
+using Infotrack.Scraper.Diagnostics;
 using Infotrack.Scraper.Models;
 
 namespace Infotrack.Scraper.Conveyancing;
 
-internal sealed class SolicitorSearchService : ISolicitorSearchService
+internal sealed class SolicitorSearchService(
+    HttpClient httpClient,
+    IoMetrics metrics) : ISolicitorSearchService
 {
-    private readonly HttpClient _httpClient;
-
-    public SolicitorSearchService(HttpClient httpClient)
-    {
-        _httpClient = httpClient;
-    }
-
-    public async Task<Result<Success, Error>> SearchAsync(string location, CancellationToken cancellationToken = default)
+    public async Task<Result<IReadOnlyList<Solicitor>, Error>> SearchAsync(
+        string location,
+        CancellationToken cancellationToken = default)
     {
         try
         {
-            var response = await _httpClient.GetAsync(string.Empty, cancellationToken);
+            using (metrics.TimeIO("GetSearch"))
+            {
+                var response = await httpClient.GetAsync($"?location={Uri.EscapeDataString(location)}", cancellationToken);
 
-            return response.IsSuccessStatusCode
-                ? new Success()
-                : new Error($"Target site returned {(int)response.StatusCode}");
+                return response.IsSuccessStatusCode
+                    ? new ReadOnlyCollection<Solicitor>([])
+                    : new Error($"Target site returned {(int)response.StatusCode}");
+            }
         }
         catch (Exception ex)
         {
