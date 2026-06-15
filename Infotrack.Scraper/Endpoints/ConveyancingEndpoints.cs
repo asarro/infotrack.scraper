@@ -18,9 +18,9 @@ internal static class ConveyancingEndpoints
 
             return result switch
             {
-                { IsSuccess: true } => Results.Ok(),
-                { IsFailure: true } => Results.BadRequest(new { result.Error.Message }),
-                _ => Results.Problem()
+                { IsSuccess: true }  => Results.Ok(result.Value),
+                { IsFailure: true }  => Results.BadRequest(new { result.Error.Message }),
+                _                    => Results.Problem()
             };
         });
 
