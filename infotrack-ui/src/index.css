@@ -1,15 +1,22 @@
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
+  /* InfoTrack brand palette (approximated from infotrack.co.uk) */
+  --brand-blue: #0093d0; /* logo blue */
+  --brand-blue-dark: #0072bc; /* headings, links */
+  --brand-orange: #f5a623; /* accent: icons, focus, wordmark dot */
+  --brand-navy: #0c2d48; /* strong text, section bars */
+  --brand-grey: #6b7280; /* body copy */
+
+  --text: var(--brand-grey);
+  --text-h: var(--brand-navy);
   --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
+  --border: #e2e8f0;
+  --code-bg: #f1f5f9;
+  --accent: var(--brand-blue-dark);
+  --accent-bg: rgba(0, 114, 188, 0.08);
+  --accent-border: rgba(0, 114, 188, 0.4);
+  --social-bg: rgba(241, 245, 249, 0.6);
   --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+    rgba(12, 45, 72, 0.1) 0 10px 15px -3px, rgba(12, 45, 72, 0.05) 0 4px 6px -2px;
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
@@ -32,15 +39,21 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
+    --brand-blue: #36b3e8;
+    --brand-blue-dark: #2aa9e0;
+    --brand-orange: #f5a623;
+    --brand-navy: #07203a;
+    --brand-grey: #9fb3c8;
+
+    --text: var(--brand-grey);
+    --text-h: #e8f1f8;
+    --bg: #0e1f30;
+    --border: #1d3a52;
+    --code-bg: #13293d;
+    --accent: var(--brand-blue);
+    --accent-bg: rgba(54, 179, 232, 0.15);
+    --accent-border: rgba(54, 179, 232, 0.5);
+    --social-bg: rgba(29, 58, 82, 0.5);
     --shadow:
       rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
   }

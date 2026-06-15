@@ -23,6 +23,16 @@ export default function LocationTagInput({ locations, tags, onAdd, onRemove }: P
     }
   }
 
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key !== 'Enter') return
+    e.preventDefault()
+    const val = input.trim()
+    if (val && !tags.includes(val)) {
+      onAdd(val)
+      setInput('')
+    }
+  }
+
   return (
     <div className="tag-input">
       {tags.map(loc => (
@@ -32,9 +42,9 @@ export default function LocationTagInput({ locations, tags, onAdd, onRemove }: P
         className="tag-autocomplete"
         value={input}
         onChange={handleChange}
+        onKeyDown={handleKeyDown}
         placeholder={tags.length === 0 ? 'Type a location…' : ''}
         list="location-suggestions"
-        disabled={available.length === 0}
       />
       <datalist id="location-suggestions">
         {available.map(loc => <option key={loc} value={loc} />)}
