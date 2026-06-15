@@ -4,12 +4,6 @@ using Infotrack.Scraper.Persistence;
 
 namespace Test.Infotrack.Scraper.Configurations;
 
-/// <summary>
-/// In-memory <see cref="ISolicitorRepository"/> for tests — no Postgres required. Models the
-/// behaviour the search path relies on: a location is unknown (Maybe.None) until upserted,
-/// and created_date is assigned once on insert and preserved on subsequent upserts.
-/// Registered as a singleton so data seeded in a test is visible to the request under test.
-/// </summary>
 internal sealed class FakeSolicitorRepository : ISolicitorRepository
 {
     private readonly object _gate = new();
@@ -61,7 +55,7 @@ internal sealed class FakeSolicitorRepository : ISolicitorRepository
                 else
                     existing.Add(new SolicitorRecord(
                         key, locationId, s.Name, s.Address, s.Phone, s.Description, s.Website,
-                        DateTimeOffset.UtcNow));
+                        DateTime.UtcNow));
             }
         }
 

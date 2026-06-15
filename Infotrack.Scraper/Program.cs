@@ -15,6 +15,10 @@ try
     Log.Debug("Starting Infotrack.Scraper");
 
     var builder = WebApplication.CreateBuilder(args);
+    builder.Host.UseSerilog((context, services, configuration) => configuration
+        .ReadFrom.Configuration(context.Configuration)
+        .Enrich.FromLogContext()
+        .WriteTo.Console());
 
     builder.Services.AddLoggingServices(builder.Configuration);
     builder.Services.AddTelemetry(builder.Configuration);

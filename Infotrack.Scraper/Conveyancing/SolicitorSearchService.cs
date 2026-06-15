@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using CSharpFunctionalExtensions;
+using Infotrack.Scraper.Diagnostics;
 using Infotrack.Scraper.Models;
 using Infotrack.Scraper.Persistence;
 using Infotrack.Scraper.Scraping;
@@ -14,7 +15,8 @@ namespace Infotrack.Scraper.Conveyancing;
 /// </summary>
 internal sealed class SolicitorSearchService(
     ISolicitorRepository repository,
-    ScraperReadiness readiness) : ISolicitorSearchService
+    ScraperReadiness readiness,
+    IoMetrics metrics) : ISolicitorSearchService
 {
     public async Task<Result<IReadOnlyList<SolicitorResponse>, Error>> SearchAsync(
         string location,
@@ -22,7 +24,9 @@ internal sealed class SolicitorSearchService(
     {
         try
         {
-            var stored = await repository.GetByLocationAsync(location, cancellationToken);
+            Maybe<IReadOnlyList<SolicitorRecord>> stored;
+            using (metrics.TimeIO("GetByLocation"))
+                stored = await repository.GetByLocationAsync(location, cancellationToken);
             if (stored.HasValue)
                 return new ReadOnlyCollection<SolicitorResponse>(stored.Value.Select(ToResponse).ToList());
 
@@ -40,5 +44,6 @@ internal sealed class SolicitorSearchService(
     }
 
     private static SolicitorResponse ToResponse(SolicitorRecord r) =>
-        new(r.Name, r.Address, r.Phone, r.Description, r.Website, r.CreatedDate);
+        new(r.Name, r.Address, r.Phone, r.Description, r.Website,
+            new DateTimeOffset(r.CreatedDate, TimeSpan.Zero));
 }

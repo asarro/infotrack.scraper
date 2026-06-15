@@ -1,22 +1,17 @@
+using System.Diagnostics;
 using Infotrack.Scraper.Configuration;
 using Infotrack.Scraper.Conveyancing;
+using Infotrack.Scraper.Diagnostics;
 using Microsoft.Extensions.Options;
 
 namespace Infotrack.Scraper.Scraping;
 
-/// <summary>
-/// Collects solicitor records for every configured location into the database — once on
-/// startup and then on a recurring interval. Search reads only from the database, so this
-/// worker is the sole writer. Locations are scraped sequentially (gentlest on the target
-/// site's bot detection); a failure for one location is logged and skipped so the rest
-/// still run. Readiness is flipped after each completed pass.
-/// </summary>
 internal sealed class SolicitorScrapeWorker(
     IServiceScopeFactory scopeFactory,
     ILocationProvider locationProvider,
     ScraperReadiness readiness,
     IOptions<ScraperScheduleOptions> options,
-    ILogger<SolicitorScrapeWorker> logger) : BackgroundService
+    ILogger<SolicitorScrapeWorker> logger) : BackgroundService 
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -44,33 +39,76 @@ internal sealed class SolicitorScrapeWorker(
 
     private async Task RunPassAsync(CancellationToken ct)
     {
-        using var scope = scopeFactory.CreateScope();
-        var scraper = scope.ServiceProvider.GetRequiredService<ISolicitorScrapeService>();
-
-        foreach (var location in locationProvider.GetLocations())
+        var scopeState = new Dictionary<string, object>
         {
-            ct.ThrowIfCancellationRequested();
+            ["ScrapeRunId"] = Guid.NewGuid().ToString()
+        };
 
-            // Search stores/looks up locations lower-cased (the endpoint lower-cases the
-            // query); keep the worker consistent or lookups will never match.
-            var normalized = location.ToLowerInvariant();
+        using (logger.BeginScope(scopeState))
+        {
+            var startedAt = Stopwatch.GetTimestamp();
+            var locations = locationProvider.GetLocations();
+            var succeeded = 0;
+            var failed = 0;
+            var stored = 0;
 
-            try
+            foreach (var location in locations)
             {
-                var result = await scraper.ScrapeAndStoreAsync(normalized, ct);
-                if (result.IsFailure)
-                    logger.LogWarning("Scrape failed for {Location}: {Error}", normalized, result.Error.Message);
-                else
-                    logger.LogInformation("Scraped {Count} solicitors for {Location}", result.Value, normalized);
+                ct.ThrowIfCancellationRequested();
+                var normalized = location.ToLowerInvariant();
+
+                try
+                {
+                    using var scope = scopeFactory.CreateScope();
+                    var scraper = scope.ServiceProvider.GetRequiredService<ISolicitorScrapeService>();
+                    var metrics = scope.ServiceProvider.GetRequiredService<IoMetrics>();
+
+                    var result = await scraper.ScrapeAndStoreAsync(normalized, ct);
+                    if (result.IsFailure)
+                    {
+                        failed++;
+                        logger.LogWarning("Scrape failed for {Location}: {Error} {@Timings}",
+                            normalized, result.Error.Message, metrics.Timings);
+                    }
+                    else
+                    {
+                        succeeded++;
+                        stored += result.Value;
+                        logger.LogInformation("Scraped {Count} solicitors for {Location} {@Timings}",
+                            result.Value, normalized, metrics.Timings);
+                    }
+                }
+                catch (OperationCanceledException) when (ct.IsCancellationRequested)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    failed++;
+                    logger.LogError(ex, "Unexpected error scraping {Location}", normalized);
+                }
             }
-            catch (OperationCanceledException) when (ct.IsCancellationRequested)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Unexpected error scraping {Location}", normalized);
-            }
+
+            var elapsedMs = Stopwatch.GetElapsedTime(startedAt).TotalMilliseconds;
+            WriteLog(failed, succeeded, locations, stored, elapsedMs);
+        }
+    }
+
+    private void WriteLog(int failed, int succeeded, IReadOnlyList<string> locations, int stored, double elapsedMs)
+    {
+        if (failed > 0)
+        {
+            logger.LogWarning(
+                "Scrape run completed: {Succeeded}/{LocationCount} locations succeeded, "
+                + "{Stored} solicitors stored, {Failed} failed in {Elapsed:0.0000} ms",
+                succeeded, locations.Count, stored, failed, elapsedMs);
+        }
+        else
+        {
+            logger.LogInformation(
+                "Scrape run completed: {Succeeded}/{LocationCount} locations succeeded, "
+                + "{Stored} solicitors stored, {Failed} failed in {Elapsed:0.0000} ms",
+                succeeded, locations.Count, stored, failed, elapsedMs);
         }
     }
 

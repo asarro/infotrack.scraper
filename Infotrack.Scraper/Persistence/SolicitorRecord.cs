@@ -8,4 +8,4 @@ internal sealed record SolicitorRecord(
     string? Phone,
     string? Description,
     string? Website,
-    DateTimeOffset CreatedDate);
+    DateTime CreatedDate);
