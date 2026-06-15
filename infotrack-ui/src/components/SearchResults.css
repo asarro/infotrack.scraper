@@ -41,6 +41,7 @@
 .solicitor-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-auto-rows: 1fr;
   gap: 16px;
 }
 
@@ -102,13 +103,6 @@
 
 .solicitor-line a:hover {
   color: var(--brand-blue-dark);
-}
-
-.solicitor-desc {
-  margin: 2px 0 0;
-  font-size: 13px;
-  line-height: 1.4;
-  color: var(--text);
 }
 
 .solicitor-website {

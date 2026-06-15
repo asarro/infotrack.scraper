@@ -29,9 +29,11 @@ export default function ResultsSection({ location, state, onRetry }: Props) {
           <p className="results-note">No solicitors found.</p>
         ) : (
           <div className="solicitor-grid">
-            {state.solicitors.map((s, i) => (
-              <SolicitorCard key={`${s.name}-${i}`} solicitor={s} />
-            ))}
+            {[...state.solicitors]
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map((s, i) => (
+                <SolicitorCard key={`${s.name}-${i}`} solicitor={s} />
+              ))}
           </div>
         )
       case 'not-loaded':

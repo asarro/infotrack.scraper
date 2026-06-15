@@ -9,7 +9,7 @@ function displayUrl(url: string) {
 }
 
 export default function SolicitorCard({ solicitor }: { solicitor: Solicitor }) {
-  const { name, address, phone, description, website } = solicitor
+  const { name, address, phone, website } = solicitor
 
   return (
     <article className="solicitor-card">
@@ -24,7 +24,6 @@ export default function SolicitorCard({ solicitor }: { solicitor: Solicitor }) {
             <a href={`tel:${phone}`}>{phone}</a>
           </p>
         )}
-        {description && <p className="solicitor-desc">{description}</p>}
         {website && (
           <a
             className="solicitor-website"
