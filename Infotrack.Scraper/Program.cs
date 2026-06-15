@@ -1,5 +1,6 @@
 using Infotrack.Scraper.Endpoints;
 using Infotrack.Scraper.Extensions;
+using Infotrack.Scraper.Middleware;
 using Scalar.AspNetCore;
 using Serilog;
 
@@ -11,11 +12,12 @@ Log.Logger = new LoggerConfiguration()
 
 try
 {
-    Log.Information("Starting Infotrack.Scraper");
+    Log.Debug("Starting Infotrack.Scraper");
 
     var builder = WebApplication.CreateBuilder(args);
 
     builder.Services.AddLoggingServices(builder.Configuration);
+    builder.Services.AddTelemetry(builder.Configuration);
     builder.Services.AddOpenApi();
     builder.Services.AddDatabase(builder.Configuration);
     builder.Services.AddCorsPolicy(builder.Configuration);
@@ -23,7 +25,8 @@ try
 
     var app = builder.Build();
 
-    app.UseSerilogRequestLogging();
+    app.UseMiddleware<LoggingMiddleware>();
+    app.UseRequestLogging();
 
     if (app.Environment.IsDevelopment())
     {
