@@ -1,3 +1,5 @@
+using Infotrack.Scraper.Conveyancing;
+using Infotrack.Scraper.Persistence;
 using Infotrack.Scraper.Scraping;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -32,50 +34,30 @@ public sealed class Scenario
         }
     }
 
-    public Scenario TheSearchSiteRespondsSuccessfully
+    /// <summary>Marks the scraper as having finished its first pass (global readiness flag).</summary>
+    public Scenario TheScraperHasCompletedAPass
     {
         get
         {
-            _mockHttp.When("*").Respond(System.Net.HttpStatusCode.OK);
+            Factory().Services.GetRequiredService<ScraperReadiness>().MarkReady();
             return this;
         }
     }
 
-    public Scenario TheSearchSiteReturnsAnError
+    /// <summary>Seeds the database with one solicitor for the given location.</summary>
+    public Scenario WithStoredSolicitorsFor(string location)
     {
-        get
-        {
-            _mockHttp.When("*").Respond(System.Net.HttpStatusCode.InternalServerError);
-            return this;
-        }
-    }
+        using var scope = Factory().Services.CreateScope();
+        var repository = scope.ServiceProvider.GetRequiredService<ISolicitorRepository>();
 
-    public Scenario TheSearchSiteRespondsWithListingHtml
-    {
-        get
+        var solicitors = new List<Solicitor>
         {
-            const string html = """
-                <html><body>
-                  <div class="result-item">
-                    <span class="h2">Test Solicitors Ltd<div class="greentick" title="quality marks"></div></span>
-                    <div class="phone-block mobile-hidden">
-                      <span>Phone:</span>
-                      <a rel="noindex" href="tel:02000000000">020 0000 0000</a>
-                    </div>
-                    <a href="/test-solicitors.html" class="link-map">
-                      <address>1 Test Street, London</address>
-                    </a>
-                    <p>Expert conveyancing solicitors serving London.</p>
-                    <ul class="list-item">
-                      <li><a target="_blank" href="https://www.test-solicitors.co.uk" rel="nofollow"><i class="fa fa-globe"></i>Website</a></li>
-                    </ul>
-                  </div>
-                </body></html>
-                """;
-            _mockHttp.When("*").Respond(System.Net.HttpStatusCode.OK,
-                new System.Net.Http.StringContent(html, System.Text.Encoding.UTF8, "text/html"));
-            return this;
-        }
+            new("Seeded Solicitors Ltd", $"1 Test Street, {location}", "020 0000 0000",
+                "Expert conveyancing.", "https://example.com")
+        };
+
+        repository.UpsertAsync(location.ToLowerInvariant(), solicitors).GetAwaiter().GetResult();
+        return this;
     }
 
     public Scenario IRequestLocations
@@ -92,6 +74,7 @@ public sealed class Scenario
 
     public Assertions Then => new(this);
 
-    internal HttpClient CreateClient() =>
-        (_factory ?? _fixture).CreateClient();
+    internal HttpClient CreateClient() => Factory().CreateClient();
+
+    private WebApplicationFactory<Program> Factory() => _factory ?? _fixture;
 }

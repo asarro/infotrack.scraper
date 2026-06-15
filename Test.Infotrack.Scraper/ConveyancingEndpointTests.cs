@@ -15,26 +15,25 @@ public class ConveyancingEndpointTests(ApiWebApplicationFixture fixture)
             .Then.ShouldGetASuccessfulResponse();
 
     [Fact]
-    public Task SearchSolicitors_WhenSiteRespondsSuccessfully_ReturnsOk() =>
+    public Task SearchSolicitors_WhenDataStored_ReturnsSolicitors() =>
         When
             .TheApplicationIsRunning
-            .And.TheSearchSiteRespondsSuccessfully
-            .And.SearchForSolicitors("London")
-            .Then.ShouldGetASuccessfulResponse();
-
-    [Fact]
-    public Task SearchSolicitors_WhenSiteReturnsError_ReturnsBadRequest() =>
-        When
-            .TheApplicationIsRunning
-            .And.TheSearchSiteReturnsAnError
-            .And.SearchForSolicitors("London")
-            .Then.ShouldGetABadRequestResponse();
-
-    [Fact]
-    public Task SearchSolicitors_WhenSiteRespondsWithHtml_ReturnsSolicitors() =>
-        When
-            .TheApplicationIsRunning
-            .And.TheSearchSiteRespondsWithListingHtml
-            .And.SearchForSolicitors("London")
+            .And.WithStoredSolicitorsFor("testville")
+            .And.SearchForSolicitors("testville")
             .Then.ShouldReturnSolicitors();
+
+    [Fact]
+    public Task SearchSolicitors_WhenWarmingUpAndNoData_ReturnsServiceUnavailable() =>
+        When
+            .TheApplicationIsRunning
+            .And.SearchForSolicitors("warming-nowhere")
+            .Then.ShouldGetAServiceUnavailableResponse();
+
+    [Fact]
+    public Task SearchSolicitors_WhenReadyAndNoData_ReturnsEmptyList() =>
+        When
+            .TheApplicationIsRunning
+            .And.TheScraperHasCompletedAPass
+            .And.SearchForSolicitors("empty-nowhere")
+            .Then.ShouldReturnAnEmptyList();
 }
