@@ -17,10 +17,14 @@ internal static class ConveyancingExtensions
         services.Configure<List<TargetSiteOptions>>(configuration.GetSection("TargetSites"))
             .AddSingleton<IPostConfigureOptions<List<TargetSiteOptions>>, ParsingRulesFileLoader>()
             .Configure<ScraperRetryOptions>(configuration.GetSection("ScraperRetryPolicy"))
+            .Configure<ScraperScheduleOptions>(configuration.GetSection("ScraperSchedule"))
             .AddSingleton<ILocationProvider, LocationProvider>()
+            .AddSingleton<ScraperReadiness>()
             .AddSingleton<HtmlSanitizer>()
             .AddSingleton<HtmlParsingEngine>()
+            .AddScoped<ISolicitorScrapeService, SolicitorScrapeService>()
             .AddScoped<ISolicitorSearchService, SolicitorSearchService>()
+            .AddHostedService<SolicitorScrapeWorker>()
             .AddHttpClients();
 
         return services;

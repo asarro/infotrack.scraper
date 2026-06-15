@@ -5,5 +5,5 @@ namespace Infotrack.Scraper.Conveyancing;
 
 internal interface ISolicitorSearchService
 {
-    Task<Result<IReadOnlyList<Solicitor>, Error>> SearchAsync(string location, CancellationToken cancellationToken = default);
+    Task<Result<IReadOnlyList<SolicitorResponse>, Error>> SearchAsync(string location, CancellationToken cancellationToken = default);
 }

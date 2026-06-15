@@ -1,49 +1,37 @@
 using System.Collections.ObjectModel;
 using CSharpFunctionalExtensions;
-using Infotrack.Scraper.Configuration;
-using Infotrack.Scraper.Diagnostics;
 using Infotrack.Scraper.Models;
 using Infotrack.Scraper.Persistence;
 using Infotrack.Scraper.Scraping;
-using Microsoft.Extensions.Options;
 
 namespace Infotrack.Scraper.Conveyancing;
 
+/// <summary>
+/// Read-only search: returns solicitor records for a location straight from the database.
+/// Scraping is owned by <see cref="SolicitorScrapeWorker"/>. When a location has no stored
+/// records and the scraper has not yet completed its first pass, a <see cref="WarmingUpError"/>
+/// is returned so the endpoint can answer 503 (retry shortly) rather than a false "no results".
+/// </summary>
 internal sealed class SolicitorSearchService(
-    ITargetSiteClient siteClient,
-    IoMetrics metrics,
-    HtmlSanitizer sanitizer,
-    HtmlParsingEngine engine,
-    IOptions<List<TargetSiteOptions>> siteOptions,
-    ISolicitorRepository repository) : ISolicitorSearchService
+    ISolicitorRepository repository,
+    ScraperReadiness readiness) : ISolicitorSearchService
 {
-    public async Task<Result<IReadOnlyList<Solicitor>, Error>> SearchAsync(
+    public async Task<Result<IReadOnlyList<SolicitorResponse>, Error>> SearchAsync(
         string location,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            var cached = await repository.GetByLocationAsync(location, cancellationToken);
-            if (cached.HasValue)
-                return new ReadOnlyCollection<Solicitor>(cached.Value.Select(ToSolicitor).ToList());
+            var stored = await repository.GetByLocationAsync(location, cancellationToken);
+            if (stored.HasValue)
+                return new ReadOnlyCollection<SolicitorResponse>(stored.Value.Select(ToResponse).ToList());
 
-            using (metrics.TimeIO("GetSearch"))
-            {
-                var rules = siteOptions.Value[0].ParsingRules;
-                if (rules is null)
-                    return new ReadOnlyCollection<Solicitor>([]);
+            // No rows for this location: warming up if the first pass hasn't finished,
+            // otherwise a genuine empty result.
+            if (!readiness.IsReady)
+                return new WarmingUpError();
 
-                var fetchResult = await siteClient.FetchHtmlAsync(location, cancellationToken);
-                if (fetchResult.IsFailure) return fetchResult.Error;
-
-                var cleanHtml = sanitizer.Sanitize(fetchResult.Value);
-                var records   = engine.Parse(cleanHtml, rules);
-                var solicitors = records.Select(SolicitorMapper.Map).ToList();
-
-                await repository.UpsertAsync(location, solicitors, cancellationToken);
-
-                return new ReadOnlyCollection<Solicitor>(solicitors);
-            }
+            return new ReadOnlyCollection<SolicitorResponse>([]);
         }
         catch (Exception ex)
         {
@@ -51,6 +39,6 @@ internal sealed class SolicitorSearchService(
         }
     }
 
-    private static Solicitor ToSolicitor(SolicitorRecord r) =>
-        new(r.Name, r.Address, r.Phone, r.Description, r.Website);
+    private static SolicitorResponse ToResponse(SolicitorRecord r) =>
+        new(r.Name, r.Address, r.Phone, r.Description, r.Website, r.CreatedDate);
 }
