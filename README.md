@@ -252,3 +252,10 @@ http://localhost:5341 for scrape log events. Once the worker completes its first
 
 - [CONTEXT.md](CONTEXT.md) — domain glossary (Solicitor, Location, ConveyancingSearch, Report)
 - [docs/adr/0001-scaffold-architecture.md](docs/adr/0001-scaffold-architecture.md) — architecture decisions
+
+## TODO
+-  Support for HTTP 503 is missing when a target website is unavailable for scraping a specific location. The Location table should store the status to indicate whether the scraping was successful or not, explicitly differentiating between an empty result and a failed scrape.
+
+- Allow users to retry scraping when the status is 503.
+
+- An HTML sanitizer is missing. Since our existing HTML parsing libraries already have built-in sanitizers, I would prefer to use those rather than writing a custom one from scratch.
